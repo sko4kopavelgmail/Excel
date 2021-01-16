@@ -1,0 +1,87 @@
+{
+	"info": {
+		"_postman_id": "88cbc4fb-3950-46fb-a6a2-50877657038c",
+		"name": "schedule",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://localhost:8080/api/v1/excel",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"direction\" : \"\",\r\n    \"group\" : \"бИСТ-202\",\r\n    \"from\" : \"\",\r\n    \"to\" : \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/excel",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"excel"
+					],
+					"query": [
+						{
+							"key": "group",
+							"value": "{\n    \"group\" : \"бИСТ-202\"\n}",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Получениче расписания с фильтрами"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/api/v1/excel/parse",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/User/Downloads/fitkb-vesenniy-semestr-2021.xlsx"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/excel/parse",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"excel",
+						"parse"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
+					]
+				},
+				"description": "Запуск парсинга с передачей файла"
+			},
+			"response": []
+		}
+	]
+}
