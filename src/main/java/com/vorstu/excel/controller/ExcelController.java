@@ -2,7 +2,8 @@ package com.vorstu.excel.controller;
 
 import com.vorstu.excel.dto.FilterProperties;
 import com.vorstu.excel.model.WorkDayEntity;
-import com.vorstu.excel.service.ExcelService;
+import com.vorstu.excel.service.ExcelParseService;
+import com.vorstu.excel.service.ExcelFilterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,7 +15,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExcelController {
 
-    private final ExcelService service;
+    private final ExcelParseService service;
+    private final ExcelFilterService excelService;
 
     @PostMapping("/parse")
     public boolean parseExcelFile(@RequestParam("file") MultipartFile file) {
@@ -23,7 +25,7 @@ public class ExcelController {
 
     @PostMapping()
     public List<WorkDayEntity> findAll(@RequestBody FilterProperties filterProperties) {
-        return service.findFilteredWorkDays(filterProperties);
+        return excelService.findFilteredWorkDays(filterProperties);
     }
 
 }

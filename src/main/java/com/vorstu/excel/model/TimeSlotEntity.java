@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "time_slot")
-@JsonIgnoreProperties({"startRowIndex", "endRowIndex", "group", "workDay"})
+@JsonIgnoreProperties({"startRowIndex", "endRowIndex", "group", "workDay", "even"})
 public class TimeSlotEntity {
 
     @Id

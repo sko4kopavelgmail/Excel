@@ -1,11 +1,10 @@
 package com.vorstu.excel.service;
 
-import com.vorstu.excel.dto.FilterProperties;
 import com.vorstu.excel.model.GroupEntity;
 import com.vorstu.excel.model.TimeSlotEntity;
 import com.vorstu.excel.model.WorkDayEntity;
 import com.vorstu.excel.repository.WorkRepository;
-import com.vorstu.excel.utils.WeekDays;
+import com.vorstu.excel.utils.WeekDay;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.util.Pair;
@@ -33,7 +32,7 @@ import static com.vorstu.excel.utils.ExcelUtils.*;
 
 @Service
 @RequiredArgsConstructor
-public class ExcelService {
+public class ExcelParseService {
 
     private static final String REBASE = "ПЕРЕЕЗД";
     private final WorkRepository workRepository;
@@ -42,12 +41,6 @@ public class ExcelService {
         List<WorkDayEntity> workDayEntities = processWorkBook(getWorkBookByInputStream(file));
         workRepository.saveAll(workDayEntities);
         return true;
-    }
-
-    public List<WorkDayEntity> findFilteredWorkDays(FilterProperties filterProperties) {
-        return workRepository.findAll().stream()
-                .filter(workDayEntity -> Objects.isNull(filterProperties.getGroup()) || workDayEntity.getGroup().getName().equals(filterProperties.getGroup()))
-                .collect(Collectors.toList());
     }
 
     private List<WorkDayEntity> processWorkBook(XSSFWorkbook workbook) {
@@ -64,13 +57,13 @@ public class ExcelService {
         if (sheet.getPhysicalNumberOfRows() == 0) {
             return workDays;
         }
-        for (WeekDays weekDay : WeekDays.values()) {
+        for (WeekDay weekDay : WeekDay.values()) {
             workDays.addAll(processWeekDay(sheet, weekDay, groups));
         }
         return workDays;
     }
 
-    private List<WorkDayEntity> processWeekDay(XSSFSheet sheet, WeekDays weekDay, List<GroupEntity> groups) {
+    private List<WorkDayEntity> processWeekDay(XSSFSheet sheet, WeekDay weekDay, List<GroupEntity> groups) {
         int weekDayRowIndex = getWeekDayRowIndex(sheet, weekDay.getValue());
         XSSFCell cell = sheet.getRow(weekDayRowIndex).getCell(0);
         Pair<Integer, Integer> weekDayRange = getFirstAndLastMergedRow(sheet, cell);
@@ -84,7 +77,7 @@ public class ExcelService {
         return groupTimeSlots(timeSlots, weekDay.getValue());
     }
 
-    private boolean checkDate(XSSFSheet sheet, WeekDays weekDay, XSSFCell timeCell) {
+    private boolean checkDate(XSSFSheet sheet, WeekDay weekDay, XSSFCell timeCell) {
         try {
             return Objects.nonNull(timeCell) && Objects.nonNull(timeCell.getDateCellValue());
         } catch (Exception e) {
