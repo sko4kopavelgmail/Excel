@@ -1,7 +1,9 @@
 package com.vorstu.excel.controller;
 
 import com.vorstu.excel.dto.FilterProperties;
+import com.vorstu.excel.model.GroupEntity;
 import com.vorstu.excel.model.WorkDayEntity;
+import com.vorstu.excel.repository.GroupRepo;
 import com.vorstu.excel.service.ExcelParseService;
 import com.vorstu.excel.service.ExcelFilterService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ public class ExcelController {
 
     private final ExcelParseService service;
     private final ExcelFilterService excelService;
+    private final GroupRepo groupRepo;
 
     @PostMapping("/parse")
     public boolean parseExcelFile(@RequestParam("file") MultipartFile file) {
@@ -26,6 +29,11 @@ public class ExcelController {
     @PostMapping()
     public List<WorkDayEntity> findAll(@RequestBody FilterProperties filterProperties) {
         return excelService.findFilteredWorkDays(filterProperties);
+    }
+
+    @GetMapping
+    public List<GroupEntity> findAllGroups() {
+        return groupRepo.findAll();
     }
 
 }

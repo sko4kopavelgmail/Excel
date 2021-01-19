@@ -4,6 +4,7 @@ import com.vorstu.excel.model.GroupEntity;
 import com.vorstu.excel.model.TimeSlotEntity;
 import com.vorstu.excel.model.WorkDayEntity;
 import com.vorstu.excel.repository.WorkRepository;
+import com.vorstu.excel.utils.LessonRange;
 import com.vorstu.excel.utils.WeekDay;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -22,10 +23,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.vorstu.excel.utils.ExcelUtils.*;
@@ -64,8 +62,11 @@ public class ExcelParseService {
     }
 
     private List<WorkDayEntity> processWeekDay(XSSFSheet sheet, WeekDay weekDay, List<GroupEntity> groups) {
-        int weekDayRowIndex = getWeekDayRowIndex(sheet, weekDay.getValue());
-        XSSFCell cell = sheet.getRow(weekDayRowIndex).getCell(0);
+        Optional<Integer> weekDayRowIndex = getWeekDayRowIndex(sheet, weekDay.getValue());
+        if (!weekDayRowIndex.isPresent()) {
+            return new ArrayList<>();
+        }
+        XSSFCell cell = sheet.getRow(weekDayRowIndex.get()).getCell(0);
         Pair<Integer, Integer> weekDayRange = getFirstAndLastMergedRow(sheet, cell);
         List<TimeSlotEntity> timeSlots = new ArrayList<>();
         for (int rowIndex = weekDayRange.getFirst(); rowIndex < weekDayRange.getSecond(); rowIndex++) {
@@ -87,7 +88,7 @@ public class ExcelParseService {
 
     private List<TimeSlotEntity> processTimeSlots(XSSFSheet sheet, XSSFCell timeCell, List<GroupEntity> groups) {
         List<TimeSlotEntity> timeSlots = new ArrayList<>();
-        LocalTime time = Instant.ofEpochMilli(timeCell.getDateCellValue().getTime()).atZone(ZoneId.systemDefault()).toLocalTime();
+        LocalTime time = getLocalTime(timeCell);
         Pair<Integer, Integer> timeCellRowRange = getFirstAndLastMergedRow(sheet, timeCell);
 
         XSSFRow row = sheet.getRow(timeCell.getRowIndex());
@@ -124,11 +125,8 @@ public class ExcelParseService {
         return timeSlots;
     }
 
-    private LocalTime getRaisedTime(LocalTime time) {
-        if (time.equals(LocalTime.of(11, 30))) {
-            return time.plus(Duration.ofMinutes(120));
-        }
-        return time.plus(Duration.ofMinutes(105));
+    private LocalTime getLocalTime(XSSFCell timeCell) {
+        return LocalTime.of(timeCell.getDateCellValue().getHours(), timeCell.getDateCellValue().getMinutes());
     }
 
     private List<TimeSlotEntity> processLesson(XSSFSheet sheet, XSSFCell cell, List<GroupEntity> groups, LocalTime time, Boolean even) {
@@ -137,14 +135,23 @@ public class ExcelParseService {
             return result;
         }
         Pair<Integer, Integer> lessonColRange = getFirstAndLastMergedCol(sheet, cell);
+        LessonRange range = LessonRange.getRangeByTime(time);
         for (GroupEntity group : groups) {
             if (group.getStartColumnIndex() >= lessonColRange.getFirst() && group.getEndColumnIndex() <= lessonColRange.getSecond()) {
-                result.add(new TimeSlotEntity(time, time, getStringValueWithoutAdditionalSpaces(cell.getStringCellValue()), even, group));
+                result.add(new TimeSlotEntity(
+                        range.getRange().getFirst(),
+                        range.getRange().getSecond(),
+                        getStringValueWithoutAdditionalSpaces(cell.getStringCellValue()), even, group)
+                );
                 continue;
             }
             if (group.getStartColumnIndex() <= lessonColRange.getFirst() && group.getEndColumnIndex() >= lessonColRange.getSecond()) {
                 even = group.getStartColumnIndex() == lessonColRange.getFirst();
-                result.add(new TimeSlotEntity(time, getRaisedTime(time), getStringValueWithoutAdditionalSpaces(cell.getStringCellValue()), even, group));
+                result.add(new TimeSlotEntity(
+                        range.getRange().getFirst(),
+                        LessonRange.getNextLessonRange(range.getIndex()).getRange().getSecond(),
+                        getStringValueWithoutAdditionalSpaces(cell.getStringCellValue()), even, group)
+                );
             }
         }
         return result;

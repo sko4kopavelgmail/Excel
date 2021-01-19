@@ -11,11 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,10 +27,11 @@ public class ExcelFilterService {
     public List<WorkDayEntity> findFilteredWorkDays(FilterProperties filterProperties) {
         List<WorkDayEntity> result = new ArrayList<>();
         GroupEntity groupEntity = groupRepo.findByName(filterProperties.getGroup());
-
-        while (!filterProperties.getFrom().isAfter(filterProperties.getTo())) {
-            buildWorkDay(filterProperties.getFrom(), groupEntity).ifPresent(result::add);
-            filterProperties.setFrom(filterProperties.getFrom().plusDays(1));
+        LocalDate from = new Date(filterProperties.getFrom()).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate to = new Date(filterProperties.getTo()).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        while (!from.isAfter(to)) {
+            buildWorkDay(from, groupEntity).ifPresent(result::add);
+            from = from.plusDays(1);
         }
 
         return result;
@@ -41,7 +41,7 @@ public class ExcelFilterService {
         String weekDay = WeekDay.getWeekDayByLocalDateValue(date.getDayOfWeek().toString()).getValue();
         Optional<WorkDayEntity> workDay = workRepository.findByGroupAndName(groupEntity, weekDay);
         if (workDay.isPresent()) {
-            workDay.get().setDate(date);
+            workDay.get().setDate(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime());
             workDay.get().setLessons(getFilteredLessons(workDay.get(), date));
             return workDay;
         }

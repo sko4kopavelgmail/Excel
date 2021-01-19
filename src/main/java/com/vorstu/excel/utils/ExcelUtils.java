@@ -1,8 +1,6 @@
 package com.vorstu.excel.utils;
 
 import org.apache.commons.math3.util.Pair;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -10,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ExcelUtils {
 
@@ -47,15 +46,18 @@ public class ExcelUtils {
         throw new RuntimeException("Unable to find table start (table starts with 'День')");
     }
 
-    public static int getWeekDayRowIndex(XSSFSheet sheet, String weekDay) {
+    public static Optional<Integer> getWeekDayRowIndex(XSSFSheet sheet, String weekDay) {
         for (int i = 0; i < sheet.getPhysicalNumberOfRows(); i++) {
             XSSFRow row = sheet.getRow(i);
+            if (Objects.isNull(row)) {
+                return Optional.empty();
+            }
             XSSFCell cell = row.getCell(0);
             if (Objects.nonNull(cell) && Objects.nonNull(cell.getStringCellValue()) && weekDay.equalsIgnoreCase(cell.getStringCellValue())) {
-                return i;
+                return Optional.of(i);
             }
         }
-        throw new RuntimeException("Unable to find weekday in the schedule table");
+        return Optional.empty();
     }
 
     private static CellRangeAddress getRangeByCell(XSSFSheet sheet, XSSFCell cell) {

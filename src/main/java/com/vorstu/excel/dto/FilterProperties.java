@@ -4,8 +4,6 @@ import com.sun.istack.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Getter
 @Setter
 public class FilterProperties {
@@ -17,9 +15,9 @@ public class FilterProperties {
     private String group;
 
     @NotNull
-    private LocalDate from;
+    private Long from;
 
     @NotNull
-    private LocalDate to;
+    private Long to;
 
 }

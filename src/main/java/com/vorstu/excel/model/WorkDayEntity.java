@@ -19,7 +19,7 @@ public class WorkDayEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate date;
+    private Long date;
 
     private String name;
 
