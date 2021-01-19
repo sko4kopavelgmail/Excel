@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter
@@ -13,7 +14,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "time_slot")
-@JsonIgnoreProperties({"startRowIndex", "endRowIndex", "group", "workDay", "even"})
+@JsonIgnoreProperties({"startRowIndex", "endRowIndex", "group", "workDay", "even", "startTime", "endTime"})
 public class TimeSlotEntity {
 
     @Id
@@ -22,7 +23,11 @@ public class TimeSlotEntity {
 
     private LocalTime startTime;
 
+    private Long startLongTime;
+
     private LocalTime endTime;
+
+    private Long endLongTime;
 
     private String value;
 

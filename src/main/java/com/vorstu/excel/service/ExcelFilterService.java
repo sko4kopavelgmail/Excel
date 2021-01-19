@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -41,7 +43,6 @@ public class ExcelFilterService {
         String weekDay = WeekDay.getWeekDayByLocalDateValue(date.getDayOfWeek().toString()).getValue();
         Optional<WorkDayEntity> workDay = workRepository.findByGroupAndName(groupEntity, weekDay);
         if (workDay.isPresent()) {
-            workDay.get().setDate(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime());
             workDay.get().setLessons(getFilteredLessons(workDay.get(), date));
             return workDay;
         }
@@ -49,9 +50,18 @@ public class ExcelFilterService {
     }
 
     private List<TimeSlotEntity> getFilteredLessons(WorkDayEntity workDay, LocalDate date) {
-        return workDay.getLessons().stream()
+        List<TimeSlotEntity> collect = workDay.getLessons().stream()
                 .filter(timeSlotEntity -> Objects.isNull(timeSlotEntity.getEven()) || isDateEven(date) == timeSlotEntity.getEven())
                 .collect(Collectors.toList());
+        for (TimeSlotEntity timeSlotEntity : collect) {
+            timeSlotEntity.setStartLongTime(getLongFromLocalDateAndLocalTime(date, timeSlotEntity.getStartTime()));
+            timeSlotEntity.setEndLongTime(getLongFromLocalDateAndLocalTime(date, timeSlotEntity.getEndTime()));
+        }
+        return collect;
+    }
+
+    private Long getLongFromLocalDateAndLocalTime(LocalDate localDate, LocalTime localTime) {
+        return LocalDateTime.of(localDate, localTime).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     private boolean isDateEven(LocalDate localDate) {
