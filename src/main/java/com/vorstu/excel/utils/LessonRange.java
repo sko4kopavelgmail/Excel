@@ -7,7 +7,7 @@ import java.time.LocalTime;
 
 public enum LessonRange {
 
-    L_8(LocalTime.of(8, 0), Pair.create(LocalTime.of(9,0), LocalTime.of(9, 45)), 0),
+    L_8(LocalTime.of(8, 0), Pair.create(LocalTime.of(8,0), LocalTime.of(9, 45)), 0),
     L_9(LocalTime.of(9, 45), Pair.create(LocalTime.of(9,45), LocalTime.of(11, 30)), 1),
     L_11(LocalTime.of(11, 30), Pair.create(LocalTime.of(11,30), LocalTime.of(13, 30)), 2),
     L_13(LocalTime.of(13, 30), Pair.create(LocalTime.of(13,30), LocalTime.of(15, 15)), 3),
