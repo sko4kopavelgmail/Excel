@@ -1,14 +1,10 @@
-package com.vorstu.excel.model;
+package com.vorstu.excel.dto;
 
-import javax.persistence.*;
 import java.time.LocalTime;
 
-@Entity
-@Table(name = "time_slot")
-public class TimeSlotEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class TimeSlotDto {
+
     private Long id;
 
     private LocalTime startTime;
@@ -23,13 +19,8 @@ public class TimeSlotEntity {
 
     private Boolean odd;
 
-    @ManyToOne
-    @JoinColumn(name = "work_day_id", nullable = false)
-    private WorkDayEntity workDay;
-
-    @ManyToOne
-    @JoinColumn(name = "group_id", nullable = false)
-    private GroupEntity group;
+    public TimeSlotDto() {
+    }
 
     public Long getId() {
         return id;
@@ -85,32 +76,5 @@ public class TimeSlotEntity {
 
     public void setOdd(Boolean odd) {
         this.odd = odd;
-    }
-
-    public WorkDayEntity getWorkDay() {
-        return workDay;
-    }
-
-    public void setWorkDay(WorkDayEntity workDay) {
-        this.workDay = workDay;
-    }
-
-    public GroupEntity getGroup() {
-        return group;
-    }
-
-    public void setGroup(GroupEntity group) {
-        this.group = group;
-    }
-
-    public TimeSlotEntity() {
-    }
-
-    public TimeSlotEntity(LocalTime startTime, LocalTime endTime, String value, Boolean odd, GroupEntity group) {
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.value = value;
-        this.odd = odd;
-        this.group = group;
     }
 }

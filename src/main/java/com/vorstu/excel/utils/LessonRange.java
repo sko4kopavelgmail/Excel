@@ -1,6 +1,5 @@
 package com.vorstu.excel.utils;
 
-import lombok.Getter;
 import org.apache.commons.math3.util.Pair;
 
 import java.time.LocalTime;
@@ -15,13 +14,10 @@ public enum LessonRange {
     L_17(LocalTime.of(17, 0), Pair.create(LocalTime.of(17,0), LocalTime.of(18, 45)), 5),
     L_18(LocalTime.of(18, 45), Pair.create(LocalTime.of(18,45), LocalTime.of(19, 30)), 6);
 
-    @Getter
     private LocalTime time;
 
-    @Getter
     private Pair<LocalTime, LocalTime> range;
 
-    @Getter
     private int index;
 
     LessonRange(LocalTime time, Pair<LocalTime, LocalTime> range, int index) {
@@ -48,4 +44,15 @@ public enum LessonRange {
         throw new RuntimeException("Unable to find provided index");
     }
 
+    public LocalTime getTime() {
+        return time;
+    }
+
+    public Pair<LocalTime, LocalTime> getRange() {
+        return range;
+    }
+
+    public int getIndex() {
+        return index;
+    }
 }

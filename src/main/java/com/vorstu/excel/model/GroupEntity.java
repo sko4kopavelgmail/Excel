@@ -1,20 +1,9 @@
 package com.vorstu.excel.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import javax.persistence.*;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "group_entity")
-@JsonIgnoreProperties({"startColumnIndex", "endColumnIndex"})
 public class GroupEntity {
 
     @Id
@@ -26,6 +15,41 @@ public class GroupEntity {
     private int startColumnIndex;
 
     private int endColumnIndex;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getStartColumnIndex() {
+        return startColumnIndex;
+    }
+
+    public void setStartColumnIndex(int startColumnIndex) {
+        this.startColumnIndex = startColumnIndex;
+    }
+
+    public int getEndColumnIndex() {
+        return endColumnIndex;
+    }
+
+    public void setEndColumnIndex(int endColumnIndex) {
+        this.endColumnIndex = endColumnIndex;
+    }
+
+    public GroupEntity() {
+    }
 
     public GroupEntity(String name, int startColumnIndex, int endColumnIndex) {
         this.name = name;

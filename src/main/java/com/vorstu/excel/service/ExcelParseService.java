@@ -6,7 +6,6 @@ import com.vorstu.excel.model.WorkDayEntity;
 import com.vorstu.excel.repository.WorkRepository;
 import com.vorstu.excel.utils.LessonRange;
 import com.vorstu.excel.utils.WeekDay;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.util.Pair;
 import org.apache.poi.ss.usermodel.CellType;
@@ -19,21 +18,24 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.vorstu.excel.utils.ExcelUtils.*;
 
 @Service
-@RequiredArgsConstructor
 public class ExcelParseService {
 
     private static final String REBASE = "ПЕРЕЕЗД";
+    private static final String EVEN = "знаменатель";
+    private static final String ODD = "числитель";
+
     private final WorkRepository workRepository;
+
+    public ExcelParseService(WorkRepository workRepository) {
+        this.workRepository = workRepository;
+    }
 
     public boolean parse(MultipartFile file) {
         List<WorkDayEntity> workDayEntities = processWorkBook(getWorkBookByInputStream(file));
@@ -108,11 +110,12 @@ public class ExcelParseService {
             if (lessonRowRange.getSecond() < timeCellRowRange.getSecond()) {
                 XSSFRow oddRow = sheet.getRow(timeCell.getRowIndex() + 1);
                 XSSFCell oddCell = oddRow.getCell(cellIndex);
-                if (Objects.isNull(oddCell) || (StringUtils.isBlank(cell.getStringCellValue()) && StringUtils.isBlank(oddCell.getStringCellValue()))) {
-                    continue;
+                if (Objects.nonNull(oddCell) && !StringUtils.isBlank(oddCell.getStringCellValue())) {
+                    timeSlots.addAll(processLesson(sheet, oddCell, groups, time, Boolean.FALSE));
                 }
-                timeSlots.addAll(processLesson(sheet, cell, groups, time, Boolean.TRUE));
-                timeSlots.addAll(processLesson(sheet, oddCell, groups, time, Boolean.FALSE));
+                if (!StringUtils.isBlank(cell.getStringCellValue())) {
+                    timeSlots.addAll(processLesson(sheet, cell, groups, time, Boolean.TRUE));
+                }
             }
             if (lessonRowRange.getSecond() > timeCellRowRange.getSecond()) {
                 if (StringUtils.isBlank(cell.getStringCellValue())) {
@@ -129,7 +132,7 @@ public class ExcelParseService {
         return LocalTime.of(timeCell.getDateCellValue().getHours(), timeCell.getDateCellValue().getMinutes());
     }
 
-    private List<TimeSlotEntity> processLesson(XSSFSheet sheet, XSSFCell cell, List<GroupEntity> groups, LocalTime time, Boolean even) {
+    private List<TimeSlotEntity> processLesson(XSSFSheet sheet, XSSFCell cell, List<GroupEntity> groups, LocalTime time, Boolean odd) {
         List<TimeSlotEntity> result = new ArrayList<>();
         if (Objects.isNull(cell)) {
             return result;
@@ -141,16 +144,22 @@ public class ExcelParseService {
                 result.add(new TimeSlotEntity(
                         range.getRange().getFirst(),
                         range.getRange().getSecond(),
-                        getStringValueWithoutAdditionalSpaces(cell.getStringCellValue()), even, group)
+                        getStringValueWithoutAdditionalSpaces(cell.getStringCellValue()), odd, group)
                 );
                 continue;
             }
             if (group.getStartColumnIndex() <= lessonColRange.getFirst() && group.getEndColumnIndex() >= lessonColRange.getSecond()) {
-                even = group.getStartColumnIndex() == lessonColRange.getFirst();
+                odd = group.getStartColumnIndex() == lessonColRange.getFirst();
+                if (cell.getStringCellValue().contains(ODD)) {
+                    odd = true;
+                }
+                if (cell.getStringCellValue().contains(EVEN)) {
+                    odd = false;
+                }
                 result.add(new TimeSlotEntity(
                         range.getRange().getFirst(),
                         LessonRange.getNextLessonRange(range.getIndex()).getRange().getSecond(),
-                        getStringValueWithoutAdditionalSpaces(cell.getStringCellValue()), even, group)
+                        getStringValueWithoutAdditionalSpaces(cell.getStringCellValue()), odd, group)
                 );
             }
         }
